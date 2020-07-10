@@ -6,7 +6,7 @@
  * Description: Extending WooFood Functionality
  * Text-Domain: custom-plugin
  */
-
+// $currency_symbol = get_woocommerce_currency_symbol();
 function custom_scripts() {
 	wp_enqueue_script( 'custom', plugin_dir_url( __FILE__ ) . '/custom.js', array( 'jquery' ), '1.0', true );
 	wp_localize_script(
@@ -15,6 +15,7 @@ function custom_scripts() {
 		array(
 			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
 			'site_url' => home_url(),
+			'currency_symbol' => $currency_symbol,
 		)
 	);
 
@@ -122,8 +123,8 @@ function cart_widget_func() {
 		);
 		?>
 		</span></p>
-		<p id=>Bezorgkosten<span>
-		€ 1.50</span></p>
+		<p id=>Bezorgkosten <?php echo get_woocommerce_currency_symbol();?><span>
+		<?php print_r($woocommerce->cart->get_cart_shipping_total()) ?></span></p>
 		<p id="total">Totaal<span>
 		<?php
 		print_r(
@@ -183,4 +184,28 @@ function increase_quantity() {
 		wp_send_json( 'Product is Added Again' );
 	}
 	wp_die();
+}
+
+
+add_action( 'wp_ajax_remove_product_generate_key', 'remove_product_generate_key' );
+add_action( 'wp_ajax_nopriv_remove_product_generate_key', 'remove_product_generate_key' );
+function remove_product_generate_key() {
+	global $woocommerce;
+	$product_id = $_POST['productId'];
+	$cart_items = json_decode(json_encode(WC()->cart->get_cart()));
+	foreach($cart_items as $cart_item){
+		if($cart_item->product_id == $product_id){
+			$remove_cart_item = WC()->cart->remove_cart_item($cart_item->key);
+			if($remove_cart_item){
+				wp_send_json("Product Removed");
+			}else{
+				wp_send_json("Product Not Removed");
+			}
+		}
+
+	}
+	// $cart_item_key = WC()->cart->find_product_in_cart( $product_cart_id );
+	// $remove_cart_item = WC()->cart->remove_cart_item( $cart_item_key );
+	// wp_send_json($cart_item_key);
+	
 }
