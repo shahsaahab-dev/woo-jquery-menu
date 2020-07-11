@@ -66,7 +66,7 @@ jQuery("body").on("click", ".add_to_cart_button", function (e) {
             success: function (response) {
                 setTimeout(function () {
                     jQuery("#ref-calc").load(window.location.href + " #ref-calc");
-                }, 200);
+                }, 50);
             }
         })
     }

@@ -86,6 +86,20 @@ function cart_widget_func() {
 		span.woocommerce-Price-amount.amount {padding: 0px;margin: 0px;}
 		span.woocommerce-Price-currencySymbol {float: left!important;}
 		a.added_to_cart.wc-forward {display: none;}
+
+
+		@media screen and (max-width:768px){
+    .cart-parent{
+        width:100%
+    }
+    .cart-widget{
+        position:unset!Important;
+        margin:0 auto!important;
+    }
+    .product-cats{
+        position:unset!important
+    }
+}
 /* End woostyles */
 </style>
 	<div class="cart-parent" id="cart-parent-ref">
@@ -123,13 +137,17 @@ function cart_widget_func() {
 		);
 		?>
 		</span></p>
+		<?php
+		$without_shipping = $woocommerce->cart->get_cart_subtotal();
+		$shipping_cost = $woocommerce->cart->get_cart_shipping_total(); 
+		?>
 		<p id=>Bezorgkosten <?php echo get_woocommerce_currency_symbol();?><span>
 		<?php print_r($woocommerce->cart->get_cart_shipping_total()) ?></span></p>
 		<p id="total">Totaal<span>
 		<?php
-		print_r(
-			$woocommerce->cart->get_cart_total()
-		);
+		$formatted_wc = ltrim($without_shipping,"£");
+		$formatted_sc = ltrim($shipping_cost,"£");
+		echo $formatted_sc . $formatted_wc;
 		?>
  </span></p>
 	</div>
@@ -160,12 +178,6 @@ function add_to_cart_decrease_button() {
 	// public function set_quantity( $cart_item_key, $quantity = 1, $refresh_totals = true ) {
 	$cart_hash = $_POST['cartHash'];
 	$quantity  = $_POST['quantity'];
-	// wp_send_json(
-	// array(
-	// 'cart_hash' => $cart_hash,
-	// 'quantity'  => $quantity,
-	// )
-	// );
 	$delete_from_cart = WC()->cart->set_quantity( $cart_hash, $quantity, true );
 	if ( $delete_from_cart ) {
 		wp_send_json( 'Item Decreased by One' );
@@ -204,8 +216,5 @@ function remove_product_generate_key() {
 		}
 
 	}
-	// $cart_item_key = WC()->cart->find_product_in_cart( $product_cart_id );
-	// $remove_cart_item = WC()->cart->remove_cart_item( $cart_item_key );
-	// wp_send_json($cart_item_key);
 	
 }
