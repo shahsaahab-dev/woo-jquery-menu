@@ -9,6 +9,7 @@ var iE = jQuery("ul.cart-item li").each(function () {
     var fiQ = parseInt(iQ);
     var fiP = parseInt(iP);
     var newPrice = fiQ *= fiP;
+    jQuery("<span>£</span>").insertBefore(jQuery(this).find(".price"));
     jQuery(this).find(".price").text(newPrice);
 });
 
@@ -34,13 +35,13 @@ jQuery("body").on("click", ".add_to_cart_button", function (e) {
     var productId = jQuery(e.target).data('product_id');
     var productTitle = jQuery(parent).children(".product-title").text();
     var productPrice = jQuery(parent).children(".product-price").text().match(/\d+/)[0];
+    console.log(productPrice);
     var quantity = 1;
     // Adding to cart
     // If product already exists then update quantity 
     if (!itemsId.includes(productId)) {
         itemsId.push(productId);
-        var productItem = `<li><div class="buttons"><button class="decrease">-</button><button class="increase">+</button></div><div class="item-details"><div class="quantity"> ${quantity}x</div><div class="food-item" data-product-id="${productId}"> ${productTitle} </div><div class="price" data-product-price="${productPrice}">${currency_symbol} ${productPrice}
-        </div></div></li>`;
+        var productItem = `<li><div class="buttons"><button class="decrease">-</button><button class="increase">+</button></div><div class="item-details"><div class="quantity"> ${quantity}x</div><div class="food-item" data-product-id="${productId}"> ${productTitle} </div><span>£</span><div class="price" data-product-price="${productPrice}">${productPrice}</div></div></li>`;
         target.append(productItem);
         setTimeout(function () {
             jQuery("#ref-calc").load(window.location.href + " #ref-calc");
@@ -55,7 +56,7 @@ jQuery("body").on("click", ".add_to_cart_button", function (e) {
         var oldPrice = parseInt(jQuery(element).find(".price").text());
         var fNewPrice = parseInt(productPrice);
         var newPrice = fNewPrice += oldPrice;
-        jQuery(element).find(".price").text(currency_symbol + newPrice);
+        jQuery(element).find(".price").text(newPrice);
         jQuery.ajax({
             url: ajax_url,
             type: 'post',
@@ -89,7 +90,14 @@ jQuery("body").on("click", ".increase", function (e) {
         formattedPrice = parseInt(currentPrice);
     var changePrice = jQuery(buttonParent).find(".price");
     changePrice.text(actualPrice += formattedPrice);
+    
     // Now Subtotal and Total
+
+    // Realtime Change 
+    var totalPrice = actualPrice += formattedPrice;
+    jQuery("#subtotal .amount").text("£" + totalPrice);
+    jQuery("#total .amount").text("£" + totalPrice);
+    // Update through Ajax
     setTimeout(function () {
         jQuery("#ref-calc").load(window.location.href + " #ref-calc");
     }, 200);
@@ -133,7 +141,7 @@ jQuery("body").on("click", ".decrease", function (e) {
 
             },
             success: function (response) {
-                console.log(response);
+                jQuery("#ref-calc").load(window.location.href + " #ref-calc");
             }
         });
     } else if (nQ <= 1 && cartHash) {
@@ -142,7 +150,8 @@ jQuery("body").on("click", ".decrease", function (e) {
         itemsId.splice(index, 1);
         var uQ = nQ - 1;
         sQ.text(uQ + "x");
-        jQuery("#subtotal .amount").text(currency_symbol + "0");
+        jQuery("#subtotal .amount").text("0");
+        jQuery("#total .amount").text("0");
         // Add to cart via ajax 
         jQuery.ajax({
             url: ajax_url,
@@ -171,7 +180,7 @@ jQuery("body").on("click", ".decrease", function (e) {
         // Now Subtotal and Total
         setTimeout(function () {
             jQuery("#ref-calc").load(window.location.href + " #ref-calc");
-        }, 200);
+        }, 500);
         // Add to cart via ajax 
         jQuery.ajax({
             url: ajax_url,
