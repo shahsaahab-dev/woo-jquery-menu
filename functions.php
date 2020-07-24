@@ -6,8 +6,8 @@ function custom_scripts() {
 		'custom',
 		'js_data',
 		array(
-			'ajaxurl'         => admin_url( 'admin-ajax.php' ),
-			'site_url'        => home_url(),
+			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
+			'site_url' => home_url(),
 		)
 	);
 
@@ -45,7 +45,6 @@ function cart_widget_func() {
 	global $woocommerce;
 	?>
 	<style>
-		body {min-height: 2000px;}
 		footer#colophon{position:fixed; bottom:0;left:0;right:0;}
 		.cart-widget {border: 2px solid #000;text-align: center;padding: 40px 10px;}
 		h2{font-size:20px;text-transform:uppercase;	}
@@ -63,7 +62,7 @@ function cart_widget_func() {
 		.btn.checkout {padding: 15px 40px;margin-top: 25px;background: #222;color: #fff;}
 		.min-order {margin-top: 25px; font-size: 12px;}
 		.cart-widget { position: absolute; width: 260px; transition: all .5s ease-in;}
-		.sticky{position:fixed!important;top:20px!important; transition:all .5s ease-in;}
+		.sticky{position:fixed!important;top:20px!important; transition:all .5s ease-in;width}
 		.panel-heading.panel-heading-title {background: none;border-bottom: 1px solid #222; padding: 0px;margin: 0px;}
 		.woofood-accordion .panel-heading .panel-title { padding: 0px!important; margin: 0px;font-size: 16px;font-weight: 600;}
 		.woofood-products .woofood-product-loop {max-width: 100%; width: 100%!important;flex: 0 auto;}
@@ -74,8 +73,8 @@ function cart_widget_func() {
 		span.woocommerce-Price-currencySymbol {float: left!important;}
 		a.added_to_cart.wc-forward {display: none;}
 		@media screen and (max-width:768px){ .cart-parent{ width:100% } .cart-widget{position:unset!Important;margin:0 auto!important; }
-        .product-cats{position:unset!important}
-        .item-details span {position: relative;top: -1px!important;}
+		.product-cats{position:unset!important}
+		.item-details span {position: relative;top: -1px!important;}
 }
 
 </style>
@@ -84,23 +83,25 @@ function cart_widget_func() {
 	<h2><?php echo __( 'JOUW BESTELLING', 'custom-plugin' ); ?></h2>
 	<ul class="cart-item" id="cart-box">
 	<?php
-    global $woocommerce;
-	$items = WC()->cart->get_cart_contents();
-	foreach ( $items as $item => $values ) {
-		$_product = wc_get_product( $values['data']->get_id() );
-		$price    = get_post_meta( $values['product_id'], '_price', true );
-		echo '
-        <li>
-        <div class="buttons">
-			<button class="decrease">-</button>
-			<button class="increase">+</button>
-        </div>
-        <div class="item-details">
-        <div class="quantity" data-product-cart-hash="' . $values['key'] . '">' . $values['quantity'] . '<span>x</span></div>
-        <div class="food-item" data-product-id = ' . $values['product_id'] . '>' . $_product->get_title() . '</div>
-        <div class="price" data-product-price="' . $price . '">' . $price . '</div>
-        </div>
-    </li>';
+	global $woocommerce;
+	$items = is_object( WC()->cart ) ? WC()->cart->get_cart_contents() : '';
+	if ( $items ) {
+		foreach ( $items as $item => $values ) {
+			$_product = wc_get_product( $values['data']->get_id() );
+			$price    = get_post_meta( $values['product_id'], '_price', true );
+			echo '
+			<li>
+			<div class="buttons">
+				<button class="decrease">-</button>
+				<button class="increase">+</button>
+			</div>
+			<div class="item-details">
+			<div class="quantity" data-product-cart-hash="' . $values['key'] . '">' . $values['quantity'] . '<span>x</span></div>
+			<div class="food-item" data-product-id = ' . $values['product_id'] . '>' . $_product->get_title() . '</div>
+			<div class="price" data-product-price="' . $price . '">' . $price . '</div>
+			</div>
+		</li>';
+		}
 	}
 
 	?>
@@ -108,19 +109,22 @@ function cart_widget_func() {
 	<div class="calcs" id="ref-calc">
 	
 		<p id="subtotal">Subtotaal<span>
-		<?php print_r($woocommerce->cart->get_cart_subtotal());?>
+		<?php
+		$subtotal = is_object( WC()->cart ) ? WC()->cart->get_cart_subtotal() : '';
+		echo $subtotal;
+		?>
 		</span></p>
 		<?php
-		$without_shipping = $woocommerce->cart->get_cart_subtotal();
-		$shipping_cost    = $woocommerce->cart->get_cart_shipping_total();
+		$without_shipping = $subtotal;
+		$shipping_cost    = is_object( WC()->cart ) ? WC()->cart->get_cart_shipping_total() : '';
 		?>
 		<p id=>Bezorgkosten <?php echo get_woocommerce_currency_symbol(); ?><span>
-		<?php print_r( $woocommerce->cart->get_cart_shipping_total() ); ?></span></p>
+		<?php print_r( $shipping_cost ); ?></span></p>
 		<p id="total">Totaal<span>
 		<?php
-            echo esc_html(substr($shipping_cost,1));
+			echo $without_shipping;
 		?>
-        </span></p>
+		</span></p>
 	</div>
 	<a href="/checkout" class="btn checkout">Bestellen</a>
 	<div class="min-order">
